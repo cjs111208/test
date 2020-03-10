@@ -46,4 +46,56 @@ hash 值的改变，都会在浏览器的访问历史中增加一个记录。因
 
 使用id属性：`<div id="/about/index">about</div>`
 
-#### 2、
+#### 2、改变“#”不会触发网页重载
+
+单单改变#后的部分，浏览器只会滚动到相应的位置，不会重新加载页面
+
+简单
+
+```
+<!DOCTYPE>
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+
+    <title>尝试锚点</title>
+  </head>
+
+  <body>
+    <ul>
+      <li><a href="#/home/index">点击跳转home</a></li>
+
+      <li><a href="#/about/index">点击跳转about</a></li>
+    </ul>
+
+    <!--设置锚点方法2-->
+    <a name="/home/index">home</a>
+
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+    <p>奥特曼</p>
+
+    <div id="/about/index">about</div>
+
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+    <p>打怪兽</p>
+  </body>
+</html>
+
+```
+
+#### 3、HTTP请求不包括“#”
+
+“#”是用来知道浏览器动作的，对服务端完全无用。所以，HTTP请求中不包括#
