@@ -159,10 +159,16 @@ window.addEventListener("hashchange", function(cevent){
 
 通过a标签或者通过location.hash方法改变路由的方式中，可以使用 hashchange 事件来监听 hash 值的变化，从而直接对于页面进行操作。
 
-$\color{#FF3030}{vue 2.8.0 以上；vue 触发的 hash 改变，不会触发 hashchage 事件}$ 
+$\color{red}{vue 2.8.0 以上；vue 触发的 hash 改变，不会触发 hashchage 事件}$ 
 
 ```
 <font color=#00ffff size=72>color=#00ffff</font>
 ```
 
-<font color=#00ffff size=72>color=#00ffff</font>
+Size：规定文本的尺寸大小，取值从 1 到 7 ，浏览器默认值是 3.
+<font face="黑体">我是黑体字</font>
+<font face="微软雅黑">我是微软雅黑</font>
+<font face="STCAIYUN">我是华文彩云</font>
+<font color=#0099ff size=3 face="黑体">color=#0099ff size=3 face="黑体"</font>
+<font color=#00ffff size=4>color=#00ffff size=4</font>
+<font color=gray size=5>color=gray size=5</font>
