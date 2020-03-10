@@ -14,15 +14,19 @@
 
  	hash 值的改变，都会在浏览器的访问历史中增加一个记录。因此我们能通过浏览器的回退、前进按钮控制hash 的切换。
 
-###2、hash值的切换方法
+### 2、hash值的切换方法
 
-####(1) vue-router
+#### (1) vue-router
 
 ​	<router-link to="/home/index">vue点击跳转home</router-link>
 
 ​	<router-link to="/about/index">vue点击跳转about</router-link>
 
-(2) a标签
+#### (2) a标签
+
+​	<a href="#/home/index">点击跳转home</a>
+
+​	<a href="#/about/index">点击跳转about</a>
 
 二、history模式及其原理
 
