@@ -162,7 +162,7 @@ window.addEventListener("hashchange", function(cevent){
 $\color{#FF3030}{vue 2.8.0 以上；vue 触发的 hash 改变，不会触发 hashchage 事件}$ 
 
 ```
-<span style="color: green"> Some green text </span>
+<font color=#00ffff size=72>color=#00ffff</font>
 ```
 
-<span style="color: green"> Some green text </span>
+<font color=#00ffff size=72>color=#00ffff</font>
