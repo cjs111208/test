@@ -28,6 +28,12 @@
 
 ​	<a href="#/about/index">点击跳转about</a>
 
+#### (3) 通过js对location.hash进行赋值
+
+​	location.hash = "#/home/index"; 
+
+​	location.hash = "#/about/index";
+
 二、history模式及其原理
 
 三、hash和history对比
