@@ -6,7 +6,7 @@
 
 ​	早期的前端路由的实现就是基于 location.hash 来实现的。其实现原理很简单，location.hash 的值就是 URL 中 # 后面的内容。比如下面这个网站，它的 location.hash 的值为 ‘#/home/index ‘：http://localhost:8080/#/home/index。
 
-![location.href](.\img\location.href.png)
+![location.href](./img/location.href.png)
 
 
 
