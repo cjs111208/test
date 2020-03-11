@@ -330,7 +330,7 @@ export default {
 
 
 
-这是因为刷新时history不仅将请求了index.html还向后台请求了路由的后缀，写在router.js的刷新都无此问题，防止这种问题出现的方法就是后端设置，无论什么发送什么请求都只访问index.html。（我这边搜集了网上用node.js的解决方案https://www.jianshu.com/p/8ebcd0c47d43）
+这是因为刷新时history不仅将请求了index.html还向后台请求了路由的后缀，写在router.js的刷新都无此问题，防止这种问题出现的方法就是后端设置，无论什么发送什么请求都只访问index.html。
 
 ### 4、history路由的核心popState
 
