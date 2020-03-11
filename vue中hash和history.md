@@ -349,7 +349,8 @@ history.length
 // 获取当前路径状态——默认键为key，值为随机数
 history.state
 
-// History的改变不会触发popstate，只有前进后退可以触发
+
+// 设置一个标识
 // let stateObj = {
 //   foo: "bar"
 // };
