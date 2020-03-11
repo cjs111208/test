@@ -146,13 +146,26 @@ window.addEventListener("hashchange", fn, false);
 
 ### 4、hash路由的核心—hashchange事件
 
-hashchange
+hashchange ( vue中 )
 
 ```
-window.addEventListener("hashchange", function(cevent){
+export default {
+  created() {
+    window.addEventListener("hashchange", this.eventTrigger, false);
+  },
+  destroyed() {
+    window.removeEventListener("hashchange", this.eventTrigger, false);
+  },
+  methods: {
+    eventTrigger(event) {
       console.log("%cevent.oldURL", "background: blue; color: white", event.oldURL);
       console.log("%cevent.newURL", "background: grey; color: white", event.newURL);
-}, false)
+      if (event.newURL.match(/\#(\/home\/index)?/)[0] === "#/home/index") {
+        alert("进入到指定页面");
+      }
+    }
+  }
+};
 ```
 
 根据这个特性，通过HashChangeEvent的oldURL和newURL方法可以实现当通过后退重新进入某个页面时进行二次跳转或者页面刷新等操作。
@@ -161,9 +174,270 @@ window.addEventListener("hashchange", function(cevent){
 
 ```diff
 - vue 2.8.0 以上；vue 触发的 hash 改变，不会触发 hashchage 事件
-$\color{#FF3030}{red}$
 ```
+所以可以在created或者mounted加入以下代码查看具体的效果
+
 ```
-$\color{#FF3030}{red}$
+    // this.$router.push("#/index");
+    // this.$router.go(-1);
 ```
 
+### 5、简单实践
+
+定位第一个进入的页面
+
+App.vue
+
+```
+    // 为第一个路由添加一个传参
+    if (!Object.keys(this.$route.query).length) {
+      this.$router.push(`${location.hash.slice(1)}?page=first`);
+    } else if (!Object.keys(this.$route.query).includes("page")) {
+      this.$router.push(`${location.hash.slice(1)}&page=first`);
+    }
+```
+
+main.js
+
+```
+let firstPath = ""
+
+router.beforeEach((to, from, next) => {
+  if (to.query.page === "first") {
+    firstPath = to.path
+    console.log("匹配当前路由", firstPath);
+    next(true);
+  } else if (to.path === firstPath && from.query.page === "first") {
+    console.log('禁止页面后退')
+    next(false);
+  } else {
+    next(true)
+  }
+});
+```
+
+## 二、history模式及其原理
+
+### 1、简介
+
+随着history Api的到来，前端路由开始进化，相比较hash，history Api给了前端完全的自由。
+
+总的来说history Api共有两种方法：
+
+#### （1）切换
+
+```
+history.go(-2);	//后退两次
+history.go(2);		//前进两次
+history.back(); 	//后退
+hsitory.forward(); 	//前进
+```
+
+#### （2）修改
+
+```
+// 向当前历史栈内最上方添加一条记录
+history.pushState(stateObj, "page 1", "/home/index");
+
+// 替换当前历史栈最上方的一条记录
+history.replaceState(stateObj, "page 1", "/home/index");
+```
+
+### 2、history的原理及简单实现
+
+本地文件打开可能会有跨域，借用了vue的服务器
+
+```
+<template>
+  <div>
+    <ul id="menu">
+      <li>
+        <a href="/test/index">首页</a>
+      </li>
+      <li>
+        <a href="/test/news">资讯</a>
+      </li>
+      <li>
+        <a href="/test/user">个人中心</a>
+      </li>
+    </ul>
+
+    <div id="history"></div>
+  </div>
+</template>
+
+<script>
+function preventA(e) {
+  if (e.target.nodeName.toLowerCase() === 'a') {
+    e.preventDefault();
+
+    //获取超链接的href，改为pushState跳转，不刷新页面
+    let path = e.target.getAttribute('href');
+
+    //修改浏览器中显示的url地址
+    window.history.pushState({ key: '' }, null, path);
+
+    //根据path，更改页面内容
+    render(path);
+  }
+}
+
+function goBack(e) {
+  render(location.pathname);
+}
+
+function render(path) {
+  let history = document.getElementById('history');
+  switch (path) {
+    case '/test/index':
+      history.innerHTML = '<h1>这是首页内容</h1>';
+      break;
+    case '/test/news':
+      history.innerHTML = '<h1>这是新闻内容</h1>';
+      break;
+    case '/test/user':
+      history.innerHTML = '<h1>这是个人中心内容</h1>';
+      break;
+    default:
+      history.innerHTML = '<h1>404</h1>';
+  }
+}
+
+export default {
+  mounted() {
+    //改造超链接，阻止默认跳转，默认的跳转是会刷新页面的
+    document.querySelector('#menu').addEventListener('click', preventA, false);
+
+    //监听浏览器前进后退事件，并根据当前路径渲染页面
+    window.addEventListener('popstate', goBack, false);
+
+    //第一次进入页面显示首页
+    render('/test/index');
+  },
+  destroyed() {
+    window.removeEventListener('popstate', goBack, false);
+  }
+};
+</script>
+
+```
+
+### 3、history的404页面
+
+在history下，当刷新时，如果服务器中没有相应的响应或者资源，会显示404页面。
+
+![location.href](./img/history刷新页面的请求.png)
+
+
+
+这是因为刷新时history不仅将请求了index.html还向后台请求了路由的后缀，写在router.js的刷新都无此问题，防止这种问题出现的方法就是后端设置，无论什么发送什么请求都只访问index.html。（我这边搜集了网上用node.js的解决方案https://www.jianshu.com/p/8ebcd0c47d43）
+
+### 4、history路由的核心popState
+
+简单用法
+
+```
+// 向当前历史栈内最上方添加一条记录
+history.pushState(null, null, location.pathname);
+
+history.back();
+history.forward();
+
+// 获取当前历史栈长度
+history.length
+
+// 获取当前路径状态——默认键为key，值为随机数
+history.state
+
+// History的改变不会触发popstate，只有前进后退可以触发
+// let stateObj = {
+//   foo: "bar"
+// };
+
+// window.addEventListener( "popstate", e => {
+//   let str = "bar";
+
+//   if (str === history.state.foo) {
+//     第一个参数，为当前页面写入一个标识，第二个参数，暂时无用，第三个参数是要跳转的路径
+//     history.pushState(stateObj, "page 1", location.pathname);
+//     alert("第一个页面");
+//   }
+// }, false );
+```
+
+### 5、简单实践
+
+#### 定位第一个进入的页面
+
+##### 方法一：通过监听popstate
+
+```
+let stateObj = {
+  foo: "bar"
+};
+
+// 替换当前历史栈最上方的一条记录，为当前路由增加状态
+history.replaceState(stateObj, "page 1", location.pathname);
+
+window.addEventListener( "popstate", e => {
+  let str = "bar";
+
+  if (str === history.state.foo) {
+    // 第一个参数，为当前页面写入一个标识，第二个参数，暂时无用，第三个参数是要跳转的路径
+    history.pushState(stateObj, "page 1", location.pathname);
+    alert("第一个页面");
+  }
+}, false );
+```
+
+##### 方法二：通过路由守卫router.beforeEach
+
+App.vue
+
+```
+    let stateObj = {
+      foo: "bar"
+    };
+
+    // 替换当前历史栈最上方的一条记录，为当前路由增加状态
+    if (!Object.keys(this.$route.query).length) {
+      history.pushState(stateObj, "page 1", location.pathname + '?page=first');
+    } else if (!Object.keys(this.$route.query).includes("page")) {
+      history.pushState(stateObj, "page 1", location.pathname + '&page=first');
+    }
+  }
+```
+
+main.js
+
+```
+let firstPath = '';
+
+router.beforeEach((to, from, next) => {
+  if (to.query.page === 'first') {
+    firstPath = to.path;
+    console.log('匹配当前路由', firstPath);
+    next(true);
+  } else if (to.path === firstPath && from.query.page === 'first') {
+    console.log('禁止页面后退');
+    next(false);
+  } else {
+    next(true);
+  }
+});
+```
+
+## 三、hash和history对比
+
+| 对比         | hash路由                                         | History 路由                                           |
+| ------------ | ------------------------------------------------ | ------------------------------------------------------ |
+| url          | 丑（有#）                                        | 优雅                                                   |
+| 命名限制     | 只可修改#后面的部分，只可设置与当前同文档的URL   | 设置的新URL可以是与当前URL同源的任意URL                |
+| 历史栈添加   | 设置的新值必须与原来不一样才会触发记录添加到栈中 | 设置的新URL可以与当前URL一模一样，也会把记录添加到栈中 |
+| 状态保存     | 无内置方法，需要另行保存页面的状态信息           | 将页面信息压入历史栈时可以附带自定义的信息             |
+| 参数传递能力 | 只可添加短字符串                                 | 通过stateObject可以添加任意类型的数据到记录中          |
+| 实用性       | 可直接使用                                       | 通常服务端需要修改代码以配合实现                       |
+| 兼容性       | IE8以上                                          | IE10以上                                               |
+| 使用原理     | hashchange                                       | popState                                               |
+| 刷新         | 前端路由修改的是#中的信息，不会被浏览器请求      | 需要后端配合将所有访问都指向index.html，否则会404错误  |
+| 灵活程度     | 较为死板，不能很好的操作URL                      | 权限更大，更加灵活多变，完全给了前端自由               |
